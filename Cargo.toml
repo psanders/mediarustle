@@ -1,0 +1,10 @@
+[package]
+name = "mediarustle"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.21.0", features = ["full"] }
+srtp = "0.7.0"
+rodio = "0.17.0"
+
