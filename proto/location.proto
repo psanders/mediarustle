@@ -1,0 +1,88 @@
+/*
+ * Copyright (C) 2023 by Fonoster Inc (https://fonoster.com)
+ * http://github.com/fonoster/routr
+ *
+ * This file is part of Routr
+ *
+ * Licensed under the MIT License (the "License");
+ * you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *    https://opensource.org/licenses/MIT
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+syntax = "proto3";
+
+package fonoster.routr.location.v2beta1;
+
+option java_multiple_files = true;
+option java_package = "io.routr.location";
+option java_outer_classname = "LocationProto";
+option objc_class_prefix = "LC";
+
+import "google/protobuf/empty.proto";
+import "common.proto";
+import "processor.proto";
+
+service Location {
+  rpc AddRoute (AddRouteRequest) returns (.google.protobuf.Empty) {}
+  rpc FindRoutes (FindRoutesRequest) returns (FindRoutesResponse) {}
+  rpc RemoveRoutes (RemoveRoutesRequest) returns (.google.protobuf.Empty) {}
+}
+
+// A binding created by an actual endpoint (Softphone, PBX, Conference System, etc.)
+message Route {
+  string user = 1;
+  string host = 2;
+  string port = 3;
+  string advertised_host = 13;
+  string advertised_port = 14;
+  fonoster.routr.common.v2beta1.Transport transport = 4;
+  int64 registered_on = 5;
+  int32 expires = 6;
+  int32 session_count = 7;
+  string edge_port_ref = 8;
+  repeated fonoster.routr.processor.v2beta1.NetInterface listening_points = 9;
+  repeated string localnets = 10;
+  repeated string external_addrs = 11;
+  // During route creation, an endpoint can request to add labels that can later be
+  // used as selectors. For example, a Softphone can add a label `priority=1` to indicate
+  // that it is the preferred endpoint for the given AOR.
+  map<string, string> labels = 12;
+}
+
+message AddRouteRequest {
+  // Address of record for the endpoint or trunk
+  string aor = 1;
+  Route route = 2;
+}
+
+message FindRoutesRequest {
+  message Backend {
+    enum Algoritm {
+      ROUND_ROBIN = 0;
+      LEAST_SESSIONS = 1;
+    }
+    string ref = 1;
+    bool with_session_affinity = 2;
+    Algoritm algorithm = 3;
+  }
+  string call_id = 1;
+  string aor = 2;
+  string session_affinity_ref = 3;
+  Backend backend = 4;
+  map<string, string> labels = 5;
+}
+
+message FindRoutesResponse {
+  repeated Route routes = 1;
+}
+
+message RemoveRoutesRequest {
+  string aor = 1;
+}

@@ -1,0 +1,92 @@
+/*
+ * Copyright (C) 2023 by Fonoster Inc (https://fonoster.com)
+ * http://github.com/fonoster/routr
+ *
+ * This file is part of Routr
+ *
+ * Licensed under the MIT License (the "License");
+ * you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *    https://opensource.org/licenses/MIT
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+syntax = "proto3";
+
+package fonoster.routr.processor.v2beta1;
+
+option java_multiple_files = true;
+option java_package = "io.routr.processor";
+option java_outer_classname = "ProcessorProto";
+option objc_class_prefix = "PR";
+
+import "common.proto";
+import "sipmessage.proto";
+
+// Processor service
+service Processor {
+  // Process Message Request
+  rpc ProcessMessage (MessageRequest) returns (MessageResponse) {}
+}
+
+enum Method {
+  UNKNOWN = 0;
+  // Communicates user location (host name, IP)
+  REGISTER = 1;
+  // Establishes a session
+  INVITE = 2;
+  // Transports Instant Messages
+  MESSAGE = 3;
+  // Publishes an event to the Server
+  PUBLISH = 4;
+  // Notifies the subscriber of a new event
+  NOTIFY = 5;
+  // Subscribes for Notification from the notifier
+  SUBSCRIBE = 6;
+  // Confirms an INVITE request
+  ACK = 7;
+  // Terminates a session
+  BYE = 8;
+  // Cancels establishing of a session
+  CANCEL = 9;
+  // Communicates information about the capabilities of the calling and receiving SIP phones
+  OPTIONS = 10;
+  // Provisional Acknowledgement
+  PRACK = 11;
+  // Sends mid session information
+  INFO = 12;
+  // Asks the recipient to issue call transfer
+  REFER = 13;
+  // Modifies the state of a session
+  UPDATE = 14;
+}
+
+message NetInterface {
+  string host = 1;
+  int32 port = 2;
+  fonoster.routr.common.v2beta1.Transport transport = 3;
+}
+
+message MessageRequest {
+  // Same as the Call-Id header 
+  string ref = 1;
+  string edge_port_ref = 2;
+  Method method = 3;
+  NetInterface sender = 4;
+  repeated NetInterface listening_points = 5;
+  repeated string external_addrs = 6;
+  repeated string localnets = 7;
+  fonoster.routr.sipmessage.v2beta1.SIPMessage message = 8;
+  map<string, string> metadata = 9;
+}
+
+message MessageResponse {
+  NetInterface sender = 1;
+  fonoster.routr.sipmessage.v2beta1.SIPMessage message = 2;
+  map<string, string> metadata = 3;
+}
